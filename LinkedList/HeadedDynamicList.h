@@ -1,34 +1,38 @@
 #include <iostream>
 #include <string>
-#ifndef DYNAMICLIST
-#define DYNAMICLIST
+#ifndef HEADEDDYNAMICLIST
+#define HEADEDDYNAMICLIST
+int item_key_counter = 0;
+const int HEAD_FLAG = -1;
+const int NOT_FOUND_FLAG = -2;
 
 template <class T>
 struct Item{
     int key;
     T content;
     Item(int x, T c):key(x),content(c){};
+    Item(int x):key(x){};
     ~Item(){};
     
 };
 template <class T>
 struct ListCell{
     ListCell<T>* next; 
-    T item {};
-    ListCell(T item, ListCell<T>* next):item(item),next(next){};
-    ListCell(T item):ListCell(item,nullptr){};
-    ListCell():ListCell({},nullptr){};
+    Item<T>* item;
+    ListCell(Item<T>* item,ListCell<T>* next): item(item),next(next){};
+    ListCell(Item<T>* item): item(item),next(nullptr){};
+    ListCell():next(nullptr){};
     ~ListCell(){};
 };
 
 template <class T>
-class AbstractList{
+class HeadedAbstractList{
     protected:
     int size = 0;
     public:
     virtual bool is_empty() = 0;
     virtual int get_size() = 0;
-    virtual T get_item(int pos) = 0;
+    virtual Item<T> get_item(int pos) = 0;
     virtual void set_item(T const &item, int pos) = 0;
     virtual void push_back(T const &item)  = 0;
     virtual void push_front(T const &item)  = 0;
@@ -37,13 +41,13 @@ class AbstractList{
     virtual void pop_front() = 0;
     virtual void pop_pos(int pos) = 0;
     virtual void clear() = 0;
-    virtual ListCell<T> search(T const &item) = 0;
-    virtual void print() = 0;
+    virtual Item<T> search(int key) = 0;
+    virtual void print(bool print_content=true) = 0;
     virtual ~AbstractList() {};
 };
 
 template <class T>
-class DynamicList: public AbstractList<T>{
+class HeadedDynamicList: public HeadedAbstractList<T>{
     private:
     ListCell<T>* first;
     ListCell<T>* last;
@@ -57,8 +61,11 @@ class DynamicList: public AbstractList<T>{
         int pos;
         IndexError(int x):pos(x){};
     };
-    DynamicList():first(nullptr),last(nullptr){};
-    ~DynamicList(){
+    HeadedDynamicList(){
+        this->first = new ListCell<T>(new Item<T>(HEAD_FLAG),nullptr);
+        this->last = nullptr;
+    };
+    ~HeadedDynamicList(){
         this->clear();
     };
     ListCell<T>* get_first(){ //O(1)
@@ -71,7 +78,7 @@ class DynamicList: public AbstractList<T>{
         return this->size;
     };
     bool is_empty(){ //O(1)
-        if(this->first == this->last && this->first == nullptr){
+        if(this->first->next == nullptr){
             return true;
         }
         return false;
@@ -94,14 +101,14 @@ class DynamicList: public AbstractList<T>{
             return 0;
         }
         ListCell<T>* temp = this->first;
-        int curr_pos = 0;
+        int curr_pos = -1;
         while(curr_pos != pos){
             curr_pos++;
             temp = temp->next;
         }
         return temp;
     };
-    T get_item(int pos) { //best: O(1), worst: O(n)
+    Item<T> get_item(int pos) { //best: O(1), worst: O(n)
         try{
             if(this->is_empty()){
                 throw EmptyListError();
@@ -115,11 +122,11 @@ class DynamicList: public AbstractList<T>{
             return 0;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl;
+            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl; 
             return 0;
         }
         ListCell<T>* temp = this->get_cell(pos);
-        return temp->item;
+        return *(temp->item);
     };
 
     void set_item(T const &item, int pos){ //best: O(1), worst: O(n)
@@ -140,40 +147,40 @@ class DynamicList: public AbstractList<T>{
             return;
         }
         ListCell<T>* temp = this->get_cell(pos);
-        temp->item = item;
+        temp->item = new Item<T>(item_key_counter,item);
+        item_key_counter++;
     };
     void push_back(T const &item) { //O(1)
         if(this->is_empty()){
-            this->first = new ListCell<T>(item,this->last);
+            this->first->next = new ListCell<T>(new Item<T>(item_key_counter,item),this->last);
+            this->last = this->first->next;
             this->size++;  
+            item_key_counter++;
         }
         else{
-            if(this->last == nullptr){
-                this->last = new ListCell<T>(item);
-                this->first->next = this->last;
-                this->size++;
-            }
-            else{
-                ListCell<T>* new_cell = new ListCell<T>(item);
-                this->last->next = new_cell;
-                this->last = new_cell;
-                this->size++;
-            }
+            ListCell<T>* new_cell = new ListCell<T>(new Item<T>(item_key_counter,item));
+            this->last->next = new_cell;
+            this->last = new_cell;
+            this->size++;
+            item_key_counter++;
         }
+
     };
     void push_front(T const &item){ //O(1)
         if(this->is_empty()){
-            this->first = new ListCell<T>(item,this->last);
+            this->first->next = new ListCell<T>(new Item<T>(item_key_counter,item),this->last);
             this->size++;
+            item_key_counter++;
         }
         else{
-            ListCell<T>* temp = this->first;
-            ListCell<T>* new_cell = new ListCell<T>(item,temp);
-            this->first = new_cell;
+            ListCell<T>* temp = this->first->next;
+            ListCell<T>* new_cell = new ListCell<T>(new Item<T>(item_key_counter,item),temp);
+            this->first->next = new_cell;
             if(new_cell->next->next == nullptr){
                 this->last = new_cell->next;
             }
             this->size++;
+            item_key_counter++;
         }
     };
     void push_pos(T const &item,int pos){ //best: O(1), worst: O(n)
@@ -190,7 +197,7 @@ class DynamicList: public AbstractList<T>{
             return;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl;
+            std::cout << __func__ <<"(" << item << "," << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl; 
             return;
         }
         if(pos == 0){
@@ -201,9 +208,10 @@ class DynamicList: public AbstractList<T>{
         }
         else{
             ListCell<T>* temp = this->get_cell(pos-1);
-            ListCell<T>* new_cell = new ListCell<T>(item,temp->next);
+            ListCell<T>* new_cell = new ListCell<T>(new Item<T>(item_key_counter,item),temp->next);
             temp->next = new_cell;
             this->size++; 
+            item_key_counter++;
         } 
     } ;
     void pop_back(){ //O(n)
@@ -268,20 +276,34 @@ class DynamicList: public AbstractList<T>{
             this->size--;
         }
     }; 
-    void print() { //O(n)
+    void print(bool print_content=true) { //O(n)
         if(this->is_empty()){
             std::cout << "Empty List!" << std::endl;
             return;
         }
-        ListCell<T>* temp = this->first;
-        while(temp != nullptr){
-            if(temp->next != nullptr){
-                std::cout << temp->item << " -> ";
-            } 
-            else{
-                std::cout << temp->item << " -> END" ;
+        ListCell<T>* temp = this->first->next;
+        std::cout << "HEAD -> ";
+        if(print_content){
+            while(temp != nullptr){
+                if(temp->next != nullptr){
+                    std::cout << temp->item->content << " -> ";
+                } 
+                else{
+                    std::cout << temp->item->content << " -> END" ;
+                }
+                temp = temp->next;
             }
-            temp = temp->next;
+        }
+        else{
+            while(temp != nullptr){
+                if(temp->next != nullptr){
+                    std::cout << temp->item->key << " -> ";
+                } 
+                else{
+                    std::cout << temp->item->key << " -> END" ;
+                }
+                temp = temp->next;
+            }
         }
         std::cout << std::endl;
     };
@@ -300,7 +322,7 @@ class DynamicList: public AbstractList<T>{
         this->last = this->first; 
         this->size = 0;
     };
-    ListCell<T> search(T const &item){ //best: O(1), worst: O(n)
+    Item<T> search(int key){ //best: O(1), worst: O(n)
         try{
             if(this->is_empty()){
                 throw EmptyListError();
@@ -311,18 +333,18 @@ class DynamicList: public AbstractList<T>{
             std::abort();
         }
         ListCell<T>* temp = this->first;
-        int curr_pos = 0;
-        while(temp->item != item){
+        int curr_pos = -1;
+        while(temp->item->key != key){
             temp = temp->next;
             if(curr_pos > this->get_size()){
                 break;
             }
         }
-        if(temp->item == item){
-            return *temp;
+        if(temp->item->key == key){
+            return *(temp->item);
         }
-        std::cout << "Item: " << item << " not found!" << std::endl;
-        return ListCell<T>();
+        std::cout << "Item with key: " << key << " not found!" << std::endl;
+        return Item<T>(NOT_FOUND_FLAG);
     };
 };
 #endif
