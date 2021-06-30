@@ -1,41 +1,17 @@
 #include <iostream>
 #include <string>
+#include "AbstractList.h"
 #ifndef DYNAMICLIST
 #define DYNAMICLIST
-// template <class T>
-// struct Item{
 
-// };
 
 template <class T>
 struct ListCell{
     ListCell<T>* next; 
     T item {};
-    // bool is_empty = true;
     ListCell(T item, ListCell<T>* next):item(item),next(next){};
     ListCell(T item):ListCell(item,nullptr){};
     ListCell():ListCell({},nullptr){};
-};
-
-template <class T>
-class AbstractList{
-    protected:
-    int size = 0;
-    public:
-    virtual bool is_empty() = 0;
-    virtual int get_size() = 0;
-    virtual T get_item(int pos) = 0;
-    virtual void set_item(T const &item, int pos) = 0;
-    virtual void push_back(T const &item)  = 0;
-    virtual void push_front(T const &item)  = 0;
-    virtual void push_pos(T const &item, int pos)  = 0;
-    virtual void pop_back() = 0;
-    virtual void pop_front() = 0;
-    virtual void pop_pos(int pos) = 0;
-    virtual void clear() = 0;
-    virtual ListCell<T> search(T const &item) = 0;
-    virtual void print() = 0;
-    virtual ~AbstractList() {};
 };
 
 template <class T>
