@@ -53,7 +53,7 @@ class DynamicList{
             if(this->is_empty()){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos >= this->size){
                 throw IndexError(pos);
             }
         }
@@ -62,7 +62,7 @@ class DynamicList{
             return 0;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl; 
+            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->size << std::endl; 
             return 0;
         }
         ListCell<T>* temp = this->first;
@@ -78,7 +78,7 @@ class DynamicList{
             if(this->is_empty()){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos >= this->size){
                 throw IndexError(pos);
             }
         }
@@ -87,7 +87,7 @@ class DynamicList{
             return 0;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl;
+            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->size << std::endl;
             return 0;
         }
         ListCell<T>* temp = this->get_cell(pos);
@@ -99,7 +99,7 @@ class DynamicList{
             if(this->is_empty()){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos >= this->size){
                 throw IndexError(pos);
             }
         }
@@ -108,7 +108,7 @@ class DynamicList{
             return;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << item << "," << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl; 
+            std::cout << __func__ <<"(" << item << "," << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->size << std::endl; 
             return;
         }
         ListCell<T>* temp = this->get_cell(pos);
@@ -153,7 +153,7 @@ class DynamicList{
             if(this->is_empty() && pos != 0){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos > this->get_size()){
+            else if(pos < 0 || pos > this->size){
                 throw IndexError(pos);
             }
         }
@@ -162,13 +162,13 @@ class DynamicList{
             return;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl;
+            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->size << std::endl;
             return;
         }
         if(pos == 0){
             this->push_front(item);
         }
-        else if(pos == this->get_size() - 1){
+        else if(pos == this->size - 1){
             this->push_back(item);
         }
         else{
@@ -189,7 +189,8 @@ class DynamicList{
             return;
         }
         if(this->size == 1){
-            delete this->first; //this->last is necessarily nullptr
+            delete this->first;
+            this->last = nullptr;
             this->size--;
         }
         else{
@@ -213,6 +214,9 @@ class DynamicList{
         ListCell<T>* temp = this->first->next;
         delete this->first;
         this->first = temp;
+        if(this->first == nullptr || this->first->next == nullptr){
+            this->last = this->first;
+        }
         this->size--;
     };
     void pop_pos(int pos){ //best: O(1), worst: O(n)
@@ -220,7 +224,7 @@ class DynamicList{
             if(this->is_empty()){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos >= this->size){
                 throw IndexError(pos);
             }
         }
@@ -229,17 +233,17 @@ class DynamicList{
             return;
         }
         catch(IndexError i){
-            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->get_size() << std::endl; 
+            std::cout << __func__ <<"(" << i.pos << ")-> IndexError: Index " << i.pos << " is out of bounds with list of size " << this->size << std::endl; 
             return;
         }
         if(pos == 0){
             this->pop_front();
         }
-        else if(pos == this->get_size() - 1){
+        else if(pos == this->size - 1){
             this->pop_back();
         }
         else{
-            ListCell<T>* temp = this->get_cell(pos-1);
+            ListCell<T>* temp = this->size(pos-1);
             ListCell<T>* temp2 = temp->next->next;
             delete temp->next;
             temp->next = temp2;
@@ -277,7 +281,7 @@ class DynamicList{
         int curr_pos = 0;
         while(temp->item != item){
             temp = temp->next;
-            if(curr_pos > this->get_size()){
+            if(curr_pos > this->size){
                 break;
             }
         }
@@ -291,14 +295,9 @@ class DynamicList{
         if(this->is_empty()){
             return;
         }
-        ListCell<T>* temp = this->first->next;
-        while(temp != nullptr){
-            this->first->next = temp->next;
-            delete temp;
-            temp = this->first->next;
+        while(!this->is_empty()){
+            this->pop_back();
         }
-        delete this->first;
-        this->last = nullptr;
         this->size = 0;
     };
 };
