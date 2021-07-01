@@ -4,14 +4,6 @@
 #define DYNAMICLIST
 
 template <class T>
-struct Item{
-    int key;
-    T content;
-    Item(int x, T c):key(x),content(c){};
-    ~Item(){};
-    
-};
-template <class T>
 struct ListCell{
     ListCell<T>* next; 
     T item {};
@@ -22,31 +14,11 @@ struct ListCell{
 };
 
 template <class T>
-class AbstractList{
-    protected:
-    int size = 0;
-    public:
-    virtual bool is_empty() = 0;
-    virtual int get_size() = 0;
-    virtual T get_item(int pos) = 0;
-    virtual void set_item(T const &item, int pos) = 0;
-    virtual void push_back(T const &item)  = 0;
-    virtual void push_front(T const &item)  = 0;
-    virtual void push_pos(T const &item, int pos)  = 0;
-    virtual void pop_back() = 0;
-    virtual void pop_front() = 0;
-    virtual void pop_pos(int pos) = 0;
-    virtual void clear() = 0;
-    virtual ListCell<T> search(T const &item) = 0;
-    virtual void print() = 0;
-    virtual ~AbstractList() {};
-};
-
-template <class T>
-class DynamicList: public AbstractList<T>{
+class DynamicList{
     private:
     ListCell<T>* first;
     ListCell<T>* last;
+    int size = 0;
     public:
     class EmptyListError{
         public:
@@ -71,7 +43,7 @@ class DynamicList: public AbstractList<T>{
         return this->size;
     };
     bool is_empty(){ //O(1)
-        if(this->first == this->last && this->first == nullptr){
+        if(this->size == 0){
             return true;
         }
         return false;
@@ -86,7 +58,7 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return 0;
         }
         catch(IndexError i){
@@ -111,7 +83,7 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return 0;
         }
         catch(IndexError i){
@@ -132,7 +104,7 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return;
         }
         catch(IndexError i){
@@ -178,15 +150,15 @@ class DynamicList: public AbstractList<T>{
     };
     void push_pos(T const &item,int pos){ //best: O(1), worst: O(n)
         try{
-            if(this->is_empty()){
+            if(this->is_empty() && pos != 0){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos > this->get_size()){
                 throw IndexError(pos);
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return;
         }
         catch(IndexError i){
@@ -213,14 +185,20 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return;
         }
-        ListCell<T>* temp = this->get_cell(this->size - 2);
-        delete temp->next;
-        temp->next = nullptr;
-        this->last = temp;
-        this->size--;
+        if(this->size == 1){
+            delete this->first; //this->last is necessarily nullptr
+            this->size--;
+        }
+        else{
+            ListCell<T>* temp = this->get_cell(this->size - 2);
+            delete temp->next;
+            temp->next = nullptr;
+            this->last = temp;
+            this->size--;
+        }
     };
     void pop_front(){ //O(1)
         try{
@@ -229,7 +207,7 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return;
         }
         ListCell<T>* temp = this->first->next;
@@ -247,7 +225,7 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
+            std::cout << __func__ << "-> " << e.message << std::endl;
             return;
         }
         catch(IndexError i){
@@ -285,21 +263,6 @@ class DynamicList: public AbstractList<T>{
         }
         std::cout << std::endl;
     };
-    void clear(){ //best: O(1), worst: O(n)
-        if(this->is_empty()){
-            return;
-        }
-        ListCell<T>* temp = this->first->next;
-        while(temp != nullptr){
-            this->first->next = temp->next;
-            delete temp;
-            temp = first->next;
-        }
-        delete this->first;
-        this->first = nullptr;
-        this->last = this->first; 
-        this->size = 0;
-    };
     ListCell<T> search(T const &item){ //best: O(1), worst: O(n)
         try{
             if(this->is_empty()){
@@ -307,8 +270,8 @@ class DynamicList: public AbstractList<T>{
             }
         }
         catch(EmptyListError e){
-            std::cout << e.message << std::endl;
-            std::abort();
+            std::cout << __func__ << "-> " << e.message << std::endl;
+            return ListCell<T>();
         }
         ListCell<T>* temp = this->first;
         int curr_pos = 0;
@@ -323,6 +286,20 @@ class DynamicList: public AbstractList<T>{
         }
         std::cout << "Item: " << item << " not found!" << std::endl;
         return ListCell<T>();
+    };
+    void clear(){ //best: O(1), worst: O(n)
+        if(this->is_empty()){
+            return;
+        }
+        ListCell<T>* temp = this->first->next;
+        while(temp != nullptr){
+            this->first->next = temp->next;
+            delete temp;
+            temp = this->first->next;
+        }
+        delete this->first;
+        this->last = nullptr;
+        this->size = 0;
     };
 };
 #endif

@@ -2,7 +2,6 @@
 #include <string>
 #ifndef HEADEDDYNAMICLIST
 #define HEADEDDYNAMICLIST
-int item_key_counter = 0;
 const int HEAD_FLAG = -1;
 const int NOT_FOUND_FLAG = -2;
 
@@ -26,31 +25,12 @@ struct ListCell{
 };
 
 template <class T>
-class HeadedAbstractList{
-    protected:
-    int size = 0;
-    public:
-    virtual bool is_empty() = 0;
-    virtual int get_size() = 0;
-    virtual Item<T> get_item(int pos) = 0;
-    virtual void set_item(T const &item, int pos) = 0;
-    virtual void push_back(T const &item)  = 0;
-    virtual void push_front(T const &item)  = 0;
-    virtual void push_pos(T const &item, int pos)  = 0;
-    virtual void pop_back() = 0;
-    virtual void pop_front() = 0;
-    virtual void pop_pos(int pos) = 0;
-    virtual void clear() = 0;
-    virtual Item<T> search(int key) = 0;
-    virtual void print(bool print_content=true) = 0;
-    virtual ~AbstractList() {};
-};
-
-template <class T>
-class HeadedDynamicList: public HeadedAbstractList<T>{
+class HeadedDynamicList{
     private:
     ListCell<T>* first;
     ListCell<T>* last;
+    int item_key_counter = 0;
+    int size = 0;
     public:
     class EmptyListError{
         public:
@@ -67,6 +47,7 @@ class HeadedDynamicList: public HeadedAbstractList<T>{
     };
     ~HeadedDynamicList(){
         this->clear();
+        delete this->first;
     };
     ListCell<T>* get_first(){ //O(1)
         return this->first;
@@ -167,28 +148,22 @@ class HeadedDynamicList: public HeadedAbstractList<T>{
 
     };
     void push_front(T const &item){ //O(1)
-        if(this->is_empty()){
-            this->first->next = new ListCell<T>(new Item<T>(item_key_counter,item),this->last);
-            this->size++;
-            item_key_counter++;
+        ListCell<T>* temp = this->first->next;
+        ListCell<T>* new_cell = new ListCell<T>(new Item<T>(item_key_counter,item),temp);
+        this->first->next = new_cell;
+        if(new_cell->next == nullptr){
+            this->last = new_cell;
         }
-        else{
-            ListCell<T>* temp = this->first->next;
-            ListCell<T>* new_cell = new ListCell<T>(new Item<T>(item_key_counter,item),temp);
-            this->first->next = new_cell;
-            if(new_cell->next->next == nullptr){
-                this->last = new_cell->next;
-            }
-            this->size++;
-            item_key_counter++;
-        }
+        this->size++;
+        item_key_counter++;
+
     };
     void push_pos(T const &item,int pos){ //best: O(1), worst: O(n)
         try{
-            if(this->is_empty()){
+            if(this->is_empty() && pos != 0){
                 throw EmptyListError();
             }
-            else if(pos < 0 || pos >= this->get_size()){
+            else if(pos < 0 || pos > this->get_size()){
                 throw IndexError(pos);
             }
         }
@@ -240,9 +215,9 @@ class HeadedDynamicList: public HeadedAbstractList<T>{
             std::cout << e.message << std::endl;
             return;
         }
-        ListCell<T>* temp = this->first->next;
-        delete this->first;
-        this->first = temp;
+        ListCell<T>* temp = this->first->next->next;
+        delete this->first->next;
+        this->first->next = temp;
         this->size--;
     };
     void pop_pos(int pos){ //best: O(1), worst: O(n)
@@ -315,11 +290,9 @@ class HeadedDynamicList: public HeadedAbstractList<T>{
         while(temp != nullptr){
             this->first->next = temp->next;
             delete temp;
-            temp = first->next;
+            temp = this->first->next;
         }
-        delete this->first;
-        this->first = nullptr;
-        this->last = this->first; 
+        this->last = this->first;
         this->size = 0;
     };
     Item<T> search(int key){ //best: O(1), worst: O(n)
