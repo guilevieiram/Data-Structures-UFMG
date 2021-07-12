@@ -3,71 +3,183 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+const int HEAD_FLAG = -1;
 template <class T>
 struct Item{
+    /*
+    Struct da estrutura Item. 
+    Atributos:
+      T content:
+        Conteúdo armazenado pelo Item. É do tipo T definido no template. É inicializado com Value Initialization(https://en.cppreference.com/w/cpp/language/value_initialization)
+      int key:
+        Chave identificadora do Item
+    */
     T content{};
+    int key;
+    Item(int key, T c){
+            /*
+        Método construtor. Inicializa os atributos key e content
+    */
+        this->key = key;
+        this->content = c;
+    }
+    Item(int key){
+            /*
+        Método construtor. Incializa apenas o atributo key
+    */
+        this->key = key;
+    }
     Item(T c){
+            /*
+        Método construtor. Inicializa apenas o atributo content
+    */
         this->content = c;
     };
-    Item() = default;
-    ~Item(){};
+    Item() = default; // Método construtor default
     
 };
 template <class T>
 struct BufferCell{
+    /*
+    Struct da estrutura BufferCell.
+    Atributos:
+      Item<T> item:
+        Atributo Item armazenado pelo BufferCell
+      BufferCell<T> *next:
+        Ponteiro para BufferCell<T>, indicando o próximo elemento do buffer
+    */
     Item<T> item;
     BufferCell<T> *next;
-    BufferCell(Item<T> item, BufferCell<T>* next):item(item),next(next){};
-    BufferCell(Item<T> item):item(item),next(nullptr){};
-    BufferCell(){};
+    BufferCell(Item<T> item, BufferCell<T>* next):item(item),next(next){}; // Método construtor. Inicializa os atributos item e next
+    BufferCell(Item<T> item):item(item),next(nullptr){}; // Método construtor que inicializa o atributo item e armazena nullptr em next
 };
 
 
 template <class T>
 class Buffer{
+    /*
+    Classe da estrutura Buffer.
+    Atributos privados:
+      BufferCell<T>* front:
+        Ponteiro para BufferCell<T>, indicando a célula cabeça do buffer
+      BufferCell<T>* back:
+        Ponteiro para BufferCell<T>, indicando a última célula do buffer
+      int size:
+        Número de células armazenadas no buffer(sem contar a célula cabeça). É inicializado por default com 0
+      int key_counter:
+        Contador que identifica a chave identificadora de itens armazenados nas células do buffer. É inicializado por default com 0
+    */
     private:
     BufferCell<T>* front;
     BufferCell<T>* back;
     int size = 0;
+    int key_counter = 0;
     public:
     Buffer(){
-        this->front = new BufferCell<T>(Item<T>());
+            /*
+        Método construtor. Inicializa o atributo front com uma nova BufferCell<T> que será a célula cabeça. Também inicializa o atributo back igual ao front
+    */
+        this->front = new BufferCell<T>(Item<T>(HEAD_FLAG));
         this->back = this->front;
     };
     ~Buffer(){
+            /*
+        Método destrutor. Chama o método clear() e depois deleta o conteúdo do atributo front
+    */
         this->clear();
         this->sanity_check();
         delete this->front;
     }
     class EmptyBufferError{
+            /*
+            Classe que representa um erro ao se tentar acessar um buffer vazio.
+            Atributos públicos:
+              std::string message:
+                Mensagem que informa o erro
+    */
         public:
         std::string message = "EmptyBufferError: Trying to access an empty Buffer!";
     };
     bool is_empty(){
+            /*
+        Método que informa se o buffer está vazio. Não recebe valores como entrada.
+        Não recebe nenhum valor de entrada.
+        Retorna:
+          Valor de tipo bool
+    */
         if(this->size == 0){
             return true;
         }
         return false;
     }
     int get_size(){
+            /*
+        Método get que retorna o atributo size do Buffer.
+        Não recebe nenhum valor de entrada.
+        Retorna:
+          int this->size
+    */
         return this->size;
     }
     void push_back(Item<T> item){
+            /*
+        Método que insere um elemento no fim do buffer.
+        Recebe:
+          Item<T> item:
+            Objeto do tipo Item<T> a ser inserido no fim do buffer
+        Não retorna nenhum valor.
+    */
+        item.key = this->key_counter;
         BufferCell<T>* new_cell = new BufferCell<T>(item);
         this->back->next = new_cell;
         this->back = new_cell;
         this->size++;
+        this->key_counter++;
     }
-    void push_back(T &content){
+    void push_back(T content){
+            /*
+        Método sobrecarregado que instancia um objeto do tipo Item e chama o método void push_back(Item<T> item) para inserir um Item no fim do buffer.
+        Recebe:
+          T content:
+            Valor do conteúdo a ser armazenado pelo Item que será inserido no fim do buffer.
+        Não retorna nenhum valor.
+    */
         this->push_back(Item<T>(content));
     }
     void push_front(Item<T> item){
+            /*
+        Método que insere um elemento no início do buffer.
+        Recebe:
+          Item<T> item:
+            Objeto do tipo Item<T> a ser inserido no início do buffer
+        Não retorna nenhum valor.
+    */
+        item.key = this->key_counter;
         BufferCell<T>* new_cell = new BufferCell<T>(item);
         new_cell->next = this->front->next;
         this->front->next = new_cell;
         this->size++;
+        this->key_counter++;
+    }
+    void push_front(T content){
+            /*
+        Método sobrecarregado que instancia um objeto do tipo Item e chama o método void push_front(Item<T> item) para inserir um Item no início do buffer. 
+        Recebe:
+          T content:
+            Valor do conteúdo a ser armazenado pelo Item que será inserido no fim do buffer.
+        Não retorna nenhum valor.
+    */
+        this->push_front(Item<T>(content));
     }
     Item<T> pop_front(){
+            /*
+        Método que remove a primeira célula do buffer e retorna o seu Item. 
+        Não recebe nenhum valor de entrada.
+        Retorna:
+          Item<T> item:
+            Objeto do tipo Item<T> armazenado pela primeira célula do buffer.
+        Joga uma instância de EmptyBufferError se o buffer estiver vazio.
+    */
         if(this->is_empty()){
             throw EmptyBufferError();
         }
@@ -79,6 +191,16 @@ class Buffer{
         return item;
     }
     Item<T> pop_pos(int pos){
+            /*
+        Método que remove a célula da posição pos do buffer e retorna o seu Item.
+        Recebe:
+          int pos:
+            Valor que representa a posição da célula a ser removida do buffer.
+        Retorna:
+          Item<T> item:
+            Objeto do tipo Item<T> armazenado pela célula da posição pos do buffer.
+        Joga uma instância de EmptyBufferError se o buffer estiver vazio.
+    */
         if(this->is_empty()){
             throw EmptyBufferError();
         }
@@ -99,32 +221,23 @@ class Buffer{
         return item;
     }
     void print(){
-        if(this->is_empty()){
-            std::cout << "Empty Buffer!" << std::endl;
-            return;
-        }
-        BufferCell<T>* temp = this->front->next;
-        std::cout << "Buffer:[";
-        while(temp != nullptr){
-            if(temp->next != nullptr){
-                std::cout << temp->item.content << ",";
-            } 
-            else{
-                std::cout << temp->item.content << "]" ;
-            }
-            temp = temp->next;
-        }
-        std::cout << std::endl;
+            /*
+            Método que imprime os valores do buffer de acordo com a saída padrão stdout. 
+            Não recebe nenhuma entrada e não retorna nenhum valor.
+            É inicializado vazio dentro da classe.
+    */
     }
-    void print_content();
     void clear(){
+            /*
+            Método que deleta todas as células do buffer, com exceção da célula cabeça. Esse método chama o método Item<T> pop_front até que o buffer esteja vazio.
+            Não recebe nenhuma entrada e não retorna nenhum valor.
+    */
         if(this->is_empty()){
             return;
         }
         while(!this->is_empty()){
             this->pop_front();
         }
-        this->size = 0;
     }
     void sanity_check(){
         if(this->is_empty()){
@@ -133,4 +246,21 @@ class Buffer{
         }
     }
 };
+template <>
+void Buffer<std::string>::print(){
+            /*
+        Especificação do método void print() da classe Buffer para o tipo std::string.
+        Não recebe nenhuma entrada e não retorna nenhum valor.
+    */
+    if(this->is_empty()){
+        return;
+    }
+    BufferCell<std::string>* temp = this->front->next;
+    std::string aux;
+    while(temp != nullptr){
+        aux = temp->item.content;
+        std::cout << aux.substr(1,aux.size()-2) << std::endl;
+        temp = temp->next;
+    }
+}
 #endif

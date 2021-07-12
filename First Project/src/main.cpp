@@ -4,90 +4,77 @@
 #include <cstdlib>
 #include "buffer.h"
 
-template <>
-void Buffer<std::string>::print_content(){
-    if(this->is_empty()){
-        return;
-    }
-    BufferCell<std::string>* temp = this->front->next;
-    std::string aux;
-    while(temp != nullptr){
-        aux = temp->item.content;
-        std::cout << aux.substr(1,aux.size()-2) << std::endl;
-        temp = temp->next;
-    }
-}
 
 int main(int argc, char *argv[]){
-    std::ifstream infile(argv[1]);
+    std::ifstream infile(argv[1]); // Lê o arquivo indicado pela linha de comando
     if(!infile){
+        // Caso o arquivo não exista, encerra o programa
         std::cerr << "Error: Unable to open file!" << std::endl;
         return 0;
     }
     int num_serv;
-    infile >> num_serv;
+    infile >> num_serv; // Lê o número de buffers da primeira linha do arquivo
 
-    Buffer<std::string> *servers = new Buffer<std::string>[num_serv];
-    Buffer<std::string> hist;
+    Buffer<std::string> *servers = new Buffer<std::string>[num_serv]; // Inicializa o array de buffers
+    Buffer<std::string> hist; // Inicializa o historico de consciencias enviadas
 
-    std::string txt;
-    std::string delim = " ", token;
-    size_t pos = 0 , tgt_serv;
+    std::string txt; // Variável que irá armazenar todo o texto de uma dada linha do arquivo
+    std::string delim = " ", token; // Variáveis auxiliares para o parsing das strings
+    int pos = 0; // Variável auxiliar para o parsing das strings
+    int tgt_serv, dest_serv, serv_pos; // Variáveis auxiliares para execução de comandos
 
-    while(std::getline(infile,txt)){
+    while(std::getline(infile,txt)){ // Loop while que lê cada linha do arquivo contendo os comandos
         if(txt.size() == 0){
             continue;
         }
-        // Get command
+        // Recebe o comando
         pos = txt.find(delim);
         token = txt.substr(0,pos);
         txt.erase(0,pos + delim.length());
-        // Handle command
+        // Identifica o comando
         if(token == "INFO"){
-            // Gets parameters for specific command
+            // Recebe os parâmetros específicos do comando
             pos = txt.find(delim);
             token = txt.substr(0,pos);
             txt.erase(0,pos + delim.length());
             tgt_serv = atoi(token.c_str());
-            // Checks validity
+            // Checa se o comando realiza operações válidas nos buffers
             if((tgt_serv >= num_serv) || (tgt_serv < 0)){
                 continue;
             }
-            // Executes command
+            // Executa o comando
             servers[tgt_serv].push_back(txt);
         }
         if(token == "WARN"){
-            // Gets parameters for specific command
-            size_t serv_pos;
+            // Recebe os parâmetros específicos do comando
             pos = txt.find(delim);
             token = txt.substr(0,pos);
             txt.erase(0,pos + delim.length());
             tgt_serv = atoi(token.c_str());
             serv_pos = atoi(txt.c_str());
-            // Checks validity
+            // Checa se o comando realiza operações válidas nos buffers
             if((tgt_serv >= num_serv) || (tgt_serv < 0)){
                 continue;
             }
             else if((serv_pos >= servers[tgt_serv].get_size()) || (serv_pos < 0)){
                 continue;
             }
-            // Executes command
+            // Executa o comando
             Item<std::string> curr_item = servers[tgt_serv].pop_pos(serv_pos);
             servers[tgt_serv].push_front(curr_item);
         }
         if(token == "TRAN"){
-            // Gets parameters for specific command
-            size_t dest_serv;
+            // Recebe os parâmetros específicos do comando
             pos = txt.find(delim);
             token = txt.substr(0,pos);
             txt.erase(0,pos + delim.length());
             tgt_serv = atoi(token.c_str());
             dest_serv = atoi(txt.c_str());
-            // Checks validity
+            // Checa se o comando realiza operações válidas nos buffers
             if((tgt_serv >= num_serv) || (tgt_serv < 0) || (dest_serv >= num_serv) || (dest_serv < 0)){
                 continue;
             }
-            // Executes command
+            // Executa o comando
             while(!servers[tgt_serv].is_empty()){
                 Item<std::string> curr_item = servers[tgt_serv].pop_front();
                 servers[dest_serv].push_back(curr_item);
@@ -95,22 +82,22 @@ int main(int argc, char *argv[]){
             servers[tgt_serv].clear();
         }
         if(token == "ERRO"){
-            // Gets parameters for specific command
+            // Recebe os parâmetros específicos do comando
             tgt_serv = atoi(txt.c_str());
-           // Checks validity
+           // Checa se o comando realiza operações válidas nos buffers
             if((tgt_serv >= num_serv) || (tgt_serv < 0)){
                 continue;
             }
-            // Executes command
+            // Executa o comando
             std::cout << token << " " << txt << std::endl;
-            servers[tgt_serv].print_content();
+            servers[tgt_serv].print();
             servers[tgt_serv].clear();
         }
         if(token == "SEND"){
-            // Executes command
+            // Executa o comando
             Item<std::string> curr_item;
             for(int i = 0; i < num_serv; i++){
-                try{
+                try{ // Caso o buffer esteja vazio, não remove seu primeiro item
                     curr_item = servers[i].pop_front();
                 }
                 catch(Buffer<std::string>::EmptyBufferError e){
@@ -120,13 +107,13 @@ int main(int argc, char *argv[]){
             }
         }
         if(token == "FLUSH"){
-            // Executes command
-            hist.print_content();
+            // Executa o comando
+            hist.print();
             for(int i = 0; i < num_serv; i++){
-                servers[i].print_content();
+                servers[i].print();
             }
         }
     }
     infile.close();
-
+    delete[] servers;
 }
