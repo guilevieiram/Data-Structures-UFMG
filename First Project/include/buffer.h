@@ -2,7 +2,6 @@
 #define BUFFER
 #include <iostream>
 #include <string>
-#include <cassert>
 const int HEAD_FLAG = -1;
 template <class T>
 struct Item{
@@ -87,7 +86,6 @@ class Buffer{
         Método destrutor. Chama o método clear() e depois deleta o conteúdo do atributo front
     */
         this->clear();
-        this->sanity_check();
         delete this->front;
     }
     class EmptyBufferError{
@@ -226,7 +224,24 @@ class Buffer{
             Não recebe nenhuma entrada e não retorna nenhum valor.
             É inicializado vazio dentro da classe.
     */
+        if(this->is_empty()){
+            std::cout << "Empty Buffer!" << std::endl;
+            return;
+        }
+        BufferCell<T>* temp = this->front->next;
+        std::cout << "Queue:[";
+        while(temp != nullptr){
+            if(temp->next != nullptr){
+                std::cout << temp->item.content << ",";
+            } 
+            else{
+                std::cout << temp->item.content << "]" ;
+            }
+            temp = temp->next;
+        }
+        std::cout << std::endl;
     }
+    void print_content();
     void clear(){
             /*
             Método que deleta todas as células do buffer, com exceção da célula cabeça. Esse método chama o método Item<T> pop_front até que o buffer esteja vazio.
@@ -239,15 +254,9 @@ class Buffer{
             this->pop_front();
         }
     }
-    void sanity_check(){
-        if(this->is_empty()){
-            assert(this->front == this->back);
-            assert(this->front != nullptr);
-        }
-    }
 };
 template <>
-void Buffer<std::string>::print(){
+void Buffer<std::string>::print_content(){
             /*
         Especificação do método void print() da classe Buffer para o tipo std::string.
         Não recebe nenhuma entrada e não retorna nenhum valor.
@@ -259,7 +268,12 @@ void Buffer<std::string>::print(){
     std::string aux;
     while(temp != nullptr){
         aux = temp->item.content;
-        std::cout << aux.substr(1,aux.size()-2) << std::endl;
+        char aux2 = '\"';
+        for(unsigned int i = 0; i < aux.size(); i++){
+            if(aux[i] != aux2)
+            std::cout << aux[i];
+        }
+        std::cout << std::endl;
         temp = temp->next;
     }
 }
