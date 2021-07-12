@@ -23,4 +23,4 @@ First Project/
 >>>.\bin\run.out <TARGET_FILE>
 >>> make clean
 ```
-Where <TARGET_FILE> stands for a .txt containing the commands for the program. If you are running this on Windows, make sure that <TARGET_FILE> is in the bin/ folder.
+Where <TARGET_FILE> stands for a .txt containing the commands for the program.
