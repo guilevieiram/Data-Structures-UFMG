@@ -13,6 +13,8 @@ First Project/
 ```
 2.1. Run the following in command prompt on Linux:
 ```
+>>> mkdir bin
+>>> mkdir obj
 >>> make 
 >>>./bin/run.out <TARGET_FILE>
 >>> make clean
