@@ -20,8 +20,7 @@ First Project/
 2.2. Or the following in Windows:
 ```
 >>> make 
->>> cd bin
->>> run.out <TARGET_FILE>
+>>>.\bin\run.out <TARGET_FILE>
 >>> make clean
 ```
 Where <TARGET_FILE> stands for a .txt containing the commands for the program. If you are running this on Windows, make sure that <TARGET_FILE> is in the bin/ folder.
