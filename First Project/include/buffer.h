@@ -231,28 +231,6 @@ class Buffer{
             this->pop_front();
         }
     }
-    void print_commented(){
-        /*
-        Método utilizado para imprimir uma versão comentada dos dados. Utilizado somente para debugar e analizar a corretude dos procedimentos.
-        Não recebe nenhuma entrada e não retorna nenhum valor.
-        */
-        if(this->is_empty()){
-            std::cout << "Empty Buffer!" << std::endl;
-            return;
-        }
-        BufferCell<T>* temp = this->front->next;
-        std::cout << "Buffer:[";
-        while(temp != nullptr){
-            if(temp->next != nullptr){
-                std::cout << temp->item.content << ",";
-            } 
-            else{
-                std::cout << temp->item.content << "]" ;
-            }
-            temp = temp->next;
-        }
-        std::cout << std::endl;
-    }
 };
 template <>
 void Buffer<std::string>::print(){
