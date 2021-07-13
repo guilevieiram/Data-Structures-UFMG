@@ -26,3 +26,6 @@ First Project/
 >>> make clean
 ```
 Where <TARGET_FILE> stands for a .txt containing the commands for the program.
+
+
+The /tests directory contain a .cpp file that performs basic structural tests using doctest.
