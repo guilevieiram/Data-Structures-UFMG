@@ -241,7 +241,7 @@ void Buffer<std::string>::print(){
     while(temp != nullptr){
         aux = temp->item.content;
         char aux2 = '\"';
-        for(int i = 0; i < aux.size(); i++){
+        for(unsigned int i = 0; i < aux.size(); i++){
             if(aux[i] != aux2)
             std::cout << aux[i];
         }
