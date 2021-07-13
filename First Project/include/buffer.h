@@ -15,19 +15,6 @@ struct Item{
     */
     T content{};
     int key;
-    Item(int key, T c){
-            /*
-        Método construtor. Inicializa os atributos key e content
-    */
-        this->key = key;
-        this->content = c;
-    }
-    Item(int key){
-            /*
-        Método construtor. Incializa apenas o atributo key
-    */
-        this->key = key;
-    }
     Item(T c){
             /*
         Método construtor. Inicializa apenas o atributo content
@@ -78,7 +65,9 @@ class Buffer{
             /*
         Método construtor. Inicializa o atributo front com uma nova BufferCell<T> que será a célula cabeça. Também inicializa o atributo back igual ao front
     */
-        this->front = new BufferCell<T>(Item<T>(HEAD_FLAG));
+        Item<T> head_item;
+        head_item.key = HEAD_FLAG;
+        this->front = new BufferCell<T>(head_item);
         this->back = this->front;
     };
     ~Buffer(){
@@ -269,7 +258,7 @@ void Buffer<std::string>::print_content(){
     while(temp != nullptr){
         aux = temp->item.content;
         char aux2 = '\"';
-        for(unsigned int i = 0; i < aux.size(); i++){
+        for(int i = 0; i < aux.size(); i++){
             if(aux[i] != aux2)
             std::cout << aux[i];
         }

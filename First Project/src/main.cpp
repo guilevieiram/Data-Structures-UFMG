@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
             }
             // Executa o comando
             std::cout << token << " " << txt << std::endl;
-            servers[tgt_serv].print_content();
+            servers[tgt_serv].print();
             servers[tgt_serv].clear();
         }
         if(token == "SEND"){
@@ -108,9 +108,9 @@ int main(int argc, char *argv[]){
         }
         if(token == "FLUSH"){
             // Executa o comando
-            hist.print_content();
+            hist.print();
             for(unsigned int i = 0; i < num_serv; i++){
-                servers[i].print_content();
+                servers[i].print();
             }
         }
     }
