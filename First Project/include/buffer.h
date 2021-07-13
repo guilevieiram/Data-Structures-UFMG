@@ -213,24 +213,7 @@ class Buffer{
             Não recebe nenhuma entrada e não retorna nenhum valor.
             É inicializado vazio dentro da classe.
     */
-        if(this->is_empty()){
-            std::cout << "Empty Buffer!" << std::endl;
-            return;
-        }
-        BufferCell<T>* temp = this->front->next;
-        std::cout << "Queue:[";
-        while(temp != nullptr){
-            if(temp->next != nullptr){
-                std::cout << temp->item.content << ",";
-            } 
-            else{
-                std::cout << temp->item.content << "]" ;
-            }
-            temp = temp->next;
-        }
-        std::cout << std::endl;
     }
-    void print_content();
     void clear(){
             /*
             Método que deleta todas as células do buffer, com exceção da célula cabeça. Esse método chama o método Item<T> pop_front até que o buffer esteja vazio.
@@ -245,7 +228,7 @@ class Buffer{
     }
 };
 template <>
-void Buffer<std::string>::print_content(){
+void Buffer<std::string>::print(){
             /*
         Especificação do método void print() da classe Buffer para o tipo std::string.
         Não recebe nenhuma entrada e não retorna nenhum valor.
