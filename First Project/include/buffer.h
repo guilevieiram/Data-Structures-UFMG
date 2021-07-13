@@ -173,8 +173,12 @@ class Buffer{
         BufferCell<T>* temp = this->front;
         Item<T> item = this->front->next->item;
         this->front = this->front->next;
+        this->front->item.key = HEAD_FLAG;
         delete temp;
         this->size--;
+        if(this->front->next == nullptr){
+            this->back = this->front;
+        }
         return item;
     }
     Item<T> pop_pos(int pos){
@@ -219,6 +223,7 @@ class Buffer{
             Método que deleta todas as células do buffer, com exceção da célula cabeça. Esse método chama o método Item<T> pop_front até que o buffer esteja vazio.
             Não recebe nenhuma entrada e não retorna nenhum valor.
     */
+        this->key_counter = 0;
         if(this->is_empty()){
             return;
         }
