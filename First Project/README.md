@@ -1,6 +1,6 @@
 # First Project in Data Structures
 In order to run this code, follow these two steps:
-1. Assert that your directory is organized according to the following structure:
+1. Assert that your directory is organized according to the following structure,i.e. create obj/ and bin/ directories:
 ```
 First Project/
 └── src/
@@ -13,8 +13,6 @@ First Project/
 ```
 2.1. Run the following in command prompt on Linux:
 ```
->>> mkdir bin
->>> mkdir obj
 >>> make 
 >>>./bin/run.out <TARGET_FILE>
 >>> make clean
