@@ -25,7 +25,7 @@ First Project/
 >>>.\bin\run.out <TARGET_FILE>
 >>> make clean
 ```
-Where <TARGET_FILE> stands for a .txt containing the commands for the program.
+Where <TARGET_FILE> stands for the .txt containing the commands for the program.
 
 
-The /tests directory contain a .cpp file that performs basic structural tests using doctest.
+The /tests directory contain a .cpp file that performs basic structural tests using doctest. These files are not automatically compiled by Make and so in order to run them, compile them manually in the respective folder.
