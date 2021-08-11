@@ -329,28 +329,28 @@ void merge_sort(Consc *vec, int begin, int end, bool order_by_data=false){
     merge_sort(vec,middle+1,end,order_by_data);
     merge(vec,begin,middle,end,order_by_data);
 }
-// sort sub groups using quick sort
-void sort_sub_groups(Consc *vec, int n){
-    /*
-    Função que ordena grupos de mesmo nome dentro de um array de acordo com seus dados binários, i.e., ordena sub-arrays com valor NAME iguais de acordo com o campo DATA.
-    Utiliza o algoritmo merge sort para a ordenação, tendo em vista sua
-    Recebe:
-        Consc *vec:
-            Array de objetos do tipo Consc.
-        int n:
-            Valor inteiro que identifica o tamanho do array.
-    Não retorna nenhum valor.
-    */
-    int j;
-    for(int i = 0; i < n; i++){
-        j = i;
-        while((j < (n-1)) && (vec[i].name == vec[j+1].name)){
-            j++;
-        }
-        merge_sort(vec,i,j,true);
-        i = j;
-    }
-}
+// // sort sub groups using quick sort
+// void sort_sub_groups(Consc *vec, int n){
+//     /*
+//     Função que ordena grupos de mesmo nome dentro de um array de acordo com seus dados binários, i.e., ordena sub-arrays com valor NAME iguais de acordo com o campo DATA.
+//     Utiliza o algoritmo merge sort para a ordenação, tendo em vista sua
+//     Recebe:
+//         Consc *vec:
+//             Array de objetos do tipo Consc.
+//         int n:
+//             Valor inteiro que identifica o tamanho do array.
+//     Não retorna nenhum valor.
+//     */
+//     int j;
+//     for(int i = 0; i < n; i++){
+//         j = i;
+//         while((j < (n-1)) && (vec[i].name == vec[j+1].name)){
+//             j++;
+//         }
+//         merge_sort(vec,i,j,true);
+//         i = j;
+//     }
+// }
 // radix exchange sort
 
 int max_value(Consc *vec, int n){

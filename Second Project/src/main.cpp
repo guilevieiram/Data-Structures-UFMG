@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
         case 1:
         heap_sort(inputs,&num_lines);
         quick_sort(inputs,num_lines);
-        sort_sub_groups(inputs,num_lines);
+        // função sort_sub_groups deveria ir aqui!
         for(int i = 0; i < num_lines; i++){
             inputs[i].print();
         }
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
         case 2:
         radix_exchange_sort(inputs,num_lines);
         quick_sort(inputs,num_lines);
-        sort_sub_groups(inputs,num_lines);
+        // função sort_sub_groups deveria ir aqui!
         for(int i = 0; i < num_lines; i++){
             inputs[i].print();
         }
@@ -53,13 +53,12 @@ int main(int argc, char *argv[]){
         case 3:
         heap_sort(inputs,&num_lines);
         merge_sort(inputs,0,num_lines - 1);
-        sort_sub_groups(inputs,num_lines);
         for(int i = 0; i < num_lines; i++){
             inputs[i].print();
         }
         break;
 
-        case 4: // Caso 4 é totalmente estável, portanto a função sort_sub_groups não é chamada.
+        case 4: 
         radix_exchange_sort(inputs,num_lines);
         merge_sort(inputs,0,num_lines - 1);
         for(int i = 0; i < num_lines; i++){
